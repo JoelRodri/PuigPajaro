@@ -6,5 +6,4 @@ public class enemigo {
     int tiempoCambio;
     boolean direccion;
     Rectangle cuerpo = new Rectangle();
-
 }
