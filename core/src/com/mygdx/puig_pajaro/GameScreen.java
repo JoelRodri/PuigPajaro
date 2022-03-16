@@ -146,20 +146,15 @@ public class GameScreen implements Screen {
 
 
             if (!si) {
-                if (score > 20) {
-                    if (spawn - lastObstacleTime > 50) spawnObstacle();
-                } else {
                     if (spawn - lastObstacleTime > 100) spawnObstacle();
-                }
             }
 
             if(!si){
                 if ((int) score % 10 == 0 && score > 1) {
-                    for (int i = 0; i < 5; i++) {
                         //if (spawn - lastBoss > 30)
+                    for (int i = 0; i < 1; i++) {
                         spawnBoss(i);
                     }
-                    si = true;
                 }
             }
 
@@ -182,38 +177,35 @@ public class GameScreen implements Screen {
 
             Iterator<enemigo> iter2 = malos.iterator();
             while (iter2.hasNext()) {
-                enemigo manco = iter2.next();
-                manco.cuerpo.x -= 200 * Gdx.graphics.getDeltaTime();
-                if (manco.cuerpo.x < -64) {
+                enemigo bonus = iter2.next();
+                bonus.cuerpo.x -= 200 * Gdx.graphics.getDeltaTime();
+                if (bonus.cuerpo.x < -64) {
                     iter2.remove();
                     if (!iter2.hasNext()) {
                         si = false;
                     }
                 }
 
-                if (manco.tiempoCambio > 0) {
-                    manco.tiempoCambio-=Gdx.graphics.getDeltaTime();
-                    if(manco.direccion)
-                        manco.cuerpo.y -= 100 * Gdx.graphics.getDeltaTime();
+                if (bonus.tiempoCambio > 0) {
+                    bonus.tiempoCambio-=Gdx.graphics.getDeltaTime();
+                    if(bonus.direccion)
+                        bonus.cuerpo.y -= 100 * Gdx.graphics.getDeltaTime();
                     else
-                        manco.cuerpo.y += 100 * Gdx.graphics.getDeltaTime();
+                        bonus.cuerpo.y += 100 * Gdx.graphics.getDeltaTime();
                 } else {
-                    manco.tiempoCambio = (int) (Math.random()*60)+20;
-                    manco.direccion = !manco.direccion;
+                    bonus.tiempoCambio = (int) (Math.random()*60)+20;
+                    bonus.direccion = !bonus.direccion;
                 }
 
-                if (manco.cuerpo.y < 50) {
-                    manco.direccion = !manco.direccion;
+                if (bonus.cuerpo.y < 50) {
+                    bonus.direccion = !bonus.direccion;
                 }
-                if (manco.cuerpo.y > 400) {
-                    manco.direccion = !manco.direccion;
+                if (bonus.cuerpo.y > 400) {
+                    bonus.direccion = !bonus.direccion;
                 }
 
-                if (manco.cuerpo.overlaps(player)) {
-                    pausar = true;
-                    birdImage = new Texture(Gdx.files.internal("birdmuerto.png"));
-                    dead = true;
-                    failSound.play();
+                if (bonus.cuerpo.overlaps(player)) {
+                    score += 10;
                 }
             }
         }
