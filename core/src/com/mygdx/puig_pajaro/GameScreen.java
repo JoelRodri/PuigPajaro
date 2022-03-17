@@ -1,7 +1,6 @@
 package com.mygdx.puig_pajaro;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,11 +10,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.TimeUtils;
 
-import java.sql.Time;
 import java.util.Iterator;
-import java.util.Random;
 
 public class GameScreen implements Screen {
     final PuigPajaro game;
@@ -28,7 +24,7 @@ public class GameScreen implements Screen {
     Rectangle player;
     boolean dead;
     boolean pausar;
-    boolean si;
+    boolean respawn;
     boolean direccion;
     float speedy;
     float gravity;
@@ -42,16 +38,14 @@ public class GameScreen implements Screen {
     Texture pausa2;
     Rectangle pausa;
     int spawn;
-    int bobo;
 
     public GameScreen(final PuigPajaro game) {
         this.game = game;
         score = 0;
         dead = false;
-        si = false;
+        respawn = false;
         pausar = false;
         direccion = false;
-        bobo = 0;
         pausa2 = new Texture(Gdx.files.internal("pausa.png"));
         backgroundImage = new Texture(Gdx.files.internal("background.png"));
         flapSound = Gdx.audio.newSound(Gdx.files.internal("flap.wav"));
@@ -114,7 +108,7 @@ public class GameScreen implements Screen {
             Vector3 touchPos = new Vector3();
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
-            speedy = 200f;
+            speedy = 400f;
             flapSound.play();
 
             if (pausa.contains(touchPos.x, touchPos.y)) {
@@ -145,16 +139,16 @@ public class GameScreen implements Screen {
             }
 
 
-            if (!si) {
-                    if (spawn - lastObstacleTime > 100) spawnObstacle();
-            }
+            if (spawn - lastObstacleTime > 100) spawnObstacle();
 
-            if(!si){
+
+            if(!respawn){
                 if ((int) score % 10 == 0 && score > 1) {
                         //if (spawn - lastBoss > 30)
                     for (int i = 0; i < 1; i++) {
                         spawnBoss(i);
                     }
+                    respawn = true;
                 }
             }
 
@@ -182,44 +176,49 @@ public class GameScreen implements Screen {
                 if (bonus.cuerpo.x < -64) {
                     iter2.remove();
                     if (!iter2.hasNext()) {
-                        si = false;
+                        respawn = false;
                     }
                 }
 
                 if (bonus.tiempoCambio > 0) {
                     bonus.tiempoCambio-=Gdx.graphics.getDeltaTime();
                     if(bonus.direccion)
-                        bonus.cuerpo.y -= 100 * Gdx.graphics.getDeltaTime();
+                        bonus.cuerpo.y -= 50 * Gdx.graphics.getDeltaTime();
                     else
-                        bonus.cuerpo.y += 100 * Gdx.graphics.getDeltaTime();
+                        bonus.cuerpo.y += 50 * Gdx.graphics.getDeltaTime();
                 } else {
                     bonus.tiempoCambio = (int) (Math.random()*60)+20;
                     bonus.direccion = !bonus.direccion;
                 }
 
-                if (bonus.cuerpo.y < 50) {
+                if (bonus.cuerpo.y < 100) {
                     bonus.direccion = !bonus.direccion;
                 }
-                if (bonus.cuerpo.y > 400) {
+                if (bonus.cuerpo.y > 300) {
                     bonus.direccion = !bonus.direccion;
                 }
 
                 if (bonus.cuerpo.overlaps(player)) {
                     score += 10;
+                    iter2.remove();
+                    respawn = false;
+
                 }
             }
         }
 
         if (dead) {
 
-            player.x += 200 * Gdx.graphics.getDeltaTime();
-            player.y += 500 * Gdx.graphics.getDeltaTime();
+            pausar = true;
+            player.y += speedy * Gdx.graphics.getDeltaTime();
+            speedy -= gravity * Gdx.graphics.getDeltaTime();
+
 
             game.lastScore = (int) score;
             if (game.lastScore > game.topScore) {
                 game.topScore = game.lastScore;
             }
-            if (player.y > 500) {
+            if (player.y < 0) {
                 game.setScreen(new GameOverScreen(game));
                 dispose();
             }
